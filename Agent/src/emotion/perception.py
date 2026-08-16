@@ -20,8 +20,6 @@ import math
 import time
 from typing import Any
 
-import redis.asyncio as aioredis
-
 from config import redis_config, perception_config
 from src.models.schemas import (
     AUIntensities,
@@ -31,33 +29,7 @@ from src.models.schemas import (
     PerceptionData,
 )
 from src.utils.logger import logger
-
-
-# ==============================================================================
-# Redis 连接管理
-# ==============================================================================
-
-_redis_pool: aioredis.ConnectionPool | None = None
-
-
-def _get_redis_pool() -> aioredis.ConnectionPool:
-    """延迟初始化 Redis 连接池（单例）"""
-    global _redis_pool
-    if _redis_pool is None:
-        _redis_pool = aioredis.ConnectionPool(
-            host=redis_config.HOST,
-            port=redis_config.PORT,
-            db=redis_config.DB,
-            password=redis_config.PASSWORD,
-            decode_responses=True,
-            max_connections=20,
-        )
-    return _redis_pool
-
-
-async def get_redis() -> aioredis.Redis:
-    """获取 Redis 客户端（使用共享连接池）"""
-    return aioredis.Redis(connection_pool=_get_redis_pool())
+from src.utils.redis_client import get_redis
 
 
 # ==============================================================================

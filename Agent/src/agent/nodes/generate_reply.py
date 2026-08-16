@@ -25,31 +25,12 @@ from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field
 
-from config import llm_config
 from src.agent.state import AgentState
 from src.agent.tools.notion_tool import record_mood_diary
 from src.agent.tools.system_health import SystemHealthStatus
 from src.models.schemas import InterventionAction, InterventionDecision
 from src.utils.logger import logger
-
-# DeepSeek 客户端（延迟初始化，复用 fuse_emotion 中的客户端）
-_deepseek_client = None
-
-
-def _get_deepseek_client():
-    global _deepseek_client
-    if _deepseek_client is None:
-        from langchain_openai import ChatOpenAI
-
-        _deepseek_client = ChatOpenAI(
-            model=llm_config.CHAT_MODEL,
-            api_key=llm_config.API_KEY,
-            base_url=llm_config.BASE_URL,
-            temperature=llm_config.TEMPERATURE,
-            max_tokens=llm_config.MAX_TOKENS,
-            timeout=llm_config.TIMEOUT,  # 显式设置超时，避免无限等待
-        )
-    return _deepseek_client
+from src.utils.llm_common import get_deepseek_client
 
 
 # ==============================================================================
@@ -424,7 +405,7 @@ async def generate_reply_node(state: AgentState) -> dict[str, Any]:
 
     # 为 LLM 绑定 Notion 情绪日记工具（Tool Calling）
     # DeepSeek 会自动判断是否需要调用 record_mood_diary
-    client = _get_deepseek_client()
+    client = get_deepseek_client()
     client_with_tools = client.bind_tools([record_mood_diary])
 
     last_error = None

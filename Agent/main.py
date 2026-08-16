@@ -5,7 +5,7 @@ from __future__ import annotations
 ====================================
 启动 Agent 服务，监听来自 Java 业务层的请求。
 
-接口（遵循 API_Contract.md 第四章）：
+接口（遵循 docs/API_CONTRACT.md 第三章）：
   POST /internal/v1/agent/invoke  — Java 请求 → Agent 决策 → SSE 流式响应
 
 SSE 响应格式（符合前端 WebSocket 协议）：

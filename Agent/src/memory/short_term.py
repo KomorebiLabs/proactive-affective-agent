@@ -12,32 +12,13 @@
 import json
 from typing import Any
 
-import redis.asyncio as aioredis
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 
 from config import redis_config, llm_config
 from src.utils.logger import logger
+from src.utils.redis_client import get_redis
 from src.models.schemas import ConversationMessage
-
-# 复用全局 Redis 连接池
-_redis_pool: aioredis.ConnectionPool | None = None
-
-def _get_redis_pool() -> aioredis.ConnectionPool:
-    global _redis_pool
-    if _redis_pool is None:
-        _redis_pool = aioredis.ConnectionPool(
-            host=redis_config.HOST,
-            port=redis_config.PORT,
-            db=redis_config.DB,
-            password=redis_config.PASSWORD,
-            decode_responses=True,
-            max_connections=20,
-        )
-    return _redis_pool
-
-async def get_redis() -> aioredis.Redis:
-    return aioredis.Redis(connection_pool=_get_redis_pool())
 
 # ==============================================================================
 # 短期记忆读取

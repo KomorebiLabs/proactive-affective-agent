@@ -32,10 +32,9 @@ from typing import Any
 
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI
 from pydantic import ValidationError
 
-from config import llm_config, emotion_config, intervention_config
+from config import emotion_config, intervention_config
 from src.agent.state import AgentState
 from src.emotion.perception import (
     check_attention_trigger,
@@ -53,26 +52,7 @@ from src.models.schemas import (
     QwenAnalysis,
 )
 from src.utils.logger import logger
-
-
-# ==============================================================================
-# DeepSeek 客户端（延迟初始化）
-# ==============================================================================
-
-_deepseek_client: ChatOpenAI | None = None
-
-
-def _get_deepseek_client() -> ChatOpenAI:
-    global _deepseek_client
-    if _deepseek_client is None:
-        _deepseek_client = ChatOpenAI(
-            model=llm_config.CHAT_MODEL,
-            api_key=llm_config.API_KEY,
-            base_url=llm_config.BASE_URL,
-            temperature=llm_config.TEMPERATURE,
-            max_tokens=llm_config.MAX_TOKENS,
-        )
-    return _deepseek_client
+from src.utils.llm_common import get_deepseek_client
 
 
 # ==============================================================================
@@ -217,7 +197,7 @@ def assemble_analysis_input(
 _JSON_BLOCK_RE = re.compile(r"```(?:json)?\s*(.*?)\s*```", re.DOTALL)
 
 
-def _clean_llm_json(raw_text: str) -> str:
+def _strip_markdown_block(raw_text: str) -> str:
     """
     清洗 LLM 输出中的 Markdown 代码块标记。
 
@@ -240,7 +220,7 @@ def _parse_llm_output(parser: PydanticOutputParser, raw_text: str) -> FuseEmotio
     """
     带清洗的 LLM 输出解析。先清洗 Markdown 标记再解析，失败时抛出异常由调用方处理。
     """
-    cleaned = _clean_llm_json(raw_text)
+    cleaned = _strip_markdown_block(raw_text)
     try:
         return parser.parse(cleaned)
     except (ValidationError, Exception) as e:
@@ -421,7 +401,7 @@ async def fuse_emotion_node(state: AgentState) -> dict[str, Any]:
 
     logger.info(f"[fuse_emotion] 调用 DeepSeek 进行情感融合分析...")
     try:
-        client = _get_deepseek_client()
+        client = get_deepseek_client()
         # 直接调用（不使用链式 | 操作符），以便在 parse 前插入清洗步骤
         messages = await prompt_text.aformat_messages(
             format_instructions=parser.get_format_instructions(),

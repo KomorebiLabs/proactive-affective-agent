@@ -395,16 +395,33 @@ function Start-All {
         Log-ToFile "WARN" "Node.js 未安装"
     }
 
-    # 1.3 检查 Redis（可选，不强制要求）
+    # 1.3 检查 Redis（未运行则尝试用 redis.persist.conf 拉起）
     Write-Step 2 7 "检查 Redis（可选）"
     try {
         $redisCheck = redis-cli ping 2>&1
         if ($LASTEXITCODE -eq 0) {
             Write-Success "Redis 已在线"
             Log-ToFile "INFO" "Redis 已在线"
+        } elseif (Get-Command redis-server -ErrorAction SilentlyContinue) {
+            Write-Warn "Redis 未运行，尝试启动（持久化模式）..."
+            $redisConf = Join-Path $Global:ProjectRoot "redis.persist.conf"
+            if (Test-Path $redisConf) {
+                Start-Process redis-server -ArgumentList "`"$redisConf`"" -WindowStyle Hidden
+            } else {
+                Start-Process redis-server -WindowStyle Hidden
+            }
+            Start-Sleep -Seconds 2
+            $redisCheck = redis-cli ping 2>&1
+            if ($LASTEXITCODE -eq 0) {
+                Write-Success "Redis 已启动"
+                Log-ToFile "INFO" "Redis 已由脚本启动"
+            } else {
+                Write-Warn "Redis 启动失败（Agent 将使用规则引擎降级，不影响核心功能）"
+                Log-ToFile "WARN" "Redis 启动失败"
+            }
         } else {
-            Write-Warn "Redis 未运行（Agent 将使用规则引擎降级，不影响核心功能）"
-            Log-ToFile "INFO" "Redis 未运行"
+            Write-Warn "Redis 未安装（Agent 将使用规则引擎降级，不影响核心功能）"
+            Log-ToFile "INFO" "Redis 未安装"
         }
     } catch {
         Write-Warn "Redis 未安装（Agent 将使用规则引擎降级，不影响核心功能）"
@@ -430,7 +447,12 @@ function Start-All {
 
     # 1.5 检查 Python 依赖（Agent）
     Write-Step 4 7 "检查 Agent Python 依赖"
-    $agentSitePackages = Join-Path $Global:AgentDir "venv\Lib\site-packages"
+    # Agent 实际 venv 为 venv2.0（sh/bat 脚本同此约定），不存在时回退 venv
+    $agentVenv = Join-Path $Global:AgentDir "venv2.0"
+    if (-not (Test-Path (Join-Path $agentVenv "Lib\site-packages"))) {
+        $agentVenv = Join-Path $Global:AgentDir "venv"
+    }
+    $agentSitePackages = Join-Path $agentVenv "Lib\site-packages"
     if (Test-Path $agentSitePackages) {
         Write-Success "Agent Python 依赖已安装: $agentSitePackages"
     } else {

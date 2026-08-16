@@ -68,7 +68,11 @@ if command -v redis-cli &> /dev/null; then
     else
         log_warn "Redis not running, attempting to start..."
         if command -v redis-server &> /dev/null; then
-            redis-server --daemonize yes --loglevel warning 2>/dev/null || true
+            if [[ -f "$SCRIPT_DIR/redis.persist.conf" ]]; then
+                redis-server "$SCRIPT_DIR/redis.persist.conf" --daemonize yes 2>/dev/null || true
+            else
+                redis-server --daemonize yes --loglevel warning 2>/dev/null || true
+            fi
             sleep 2
             if redis-cli ping &> /dev/null; then
                 log_info "Redis started successfully"
