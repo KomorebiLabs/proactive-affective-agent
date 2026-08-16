@@ -1,0 +1,58 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: wanqing-ai-backend
+  # 从 backend/.env 读取本地凭据（该文件已被 .gitignore 忽略，禁止提交真实密码）
+  config:
+    import: optional:file:.env[.properties]
+  datasource:
+    # 提醒: 请先在 MySQL 中创建数据库 wanqing_ai，并在 backend/.env 中配置 MYSQL_USERNAME/MYSQL_PASSWORD
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${MYSQL_URL:jdbc:mysql://127.0.0.1:3306/wanqing_ai?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true}
+    username: ${MYSQL_USERNAME:root}
+    password: ${MYSQL_PASSWORD:}
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      database: 0
+      # password: 填入密码（无密码则注释掉）
+      timeout: 5000ms
+      lettuce:
+        pool:
+          max-active: 10
+          max-idle: 5
+          min-idle: 1
+
+# MyBatis-Plus 配置
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  configuration:
+    # 开启驼峰命名自动映射
+    map-underscore-to-camel-case: true
+    # 打印 SQL 日志以便调试
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# 自定义 Python Agent 引擎配置
+agent:
+  engine:
+    # Java AgentClient 直接调用 Python Agent 智能体（Agent/main.py，端口 8001）
+    # LangGraph 状态机：情感融合 → 干预决策 → RAG 检索 → DeepSeek 回复生成
+    url: ${AGENT_ENGINE_URL:http://localhost:8001}
+
+# Python 感知微服务配置（用于会话切换通知）
+perception:
+  service:
+    url: ${PERCEPTION_SERVICE_URL:http://localhost:8000}
+
+# 日志配置（解决 Windows 终端中文乱码问题）
+logging:
+  charset:
+    console: UTF-8
+    file: UTF-8
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} | %5p | %logger{36} | %msg%n"
+  level:
+    com.wanqing: DEBUG

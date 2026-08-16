@@ -1,0 +1,42 @@
+langgraph==0.2.73
+langchain==0.3.21
+langchain-core==0.3.49
+langchain-openai==0.3.11
+langchain-community==0.3.20
+openai==1.70.0
+chromadb==0.6.3
+sentence-transformers==3.4.1
+torch==2.6.0
+redis==5.2.1
+sqlalchemy==2.0.40
+aiomysql==0.2.0
+alembic==1.15.1
+mediapipe==0.10.21
+opensmile==2.5.0
+pydantic==2.11.1
+pydantic-settings==2.8.1
+python-multipart==0.0.20
+python-dotenv==1.1.0
+loguru==0.7.3
+numpy>=1.26.2,<2
+scipy==1.15.2
+httpx==0.28.1
+aiofiles==24.1.0
+python-dateutil==2.9.0
+notion-client==2.2.1
+oss2==2.19.1
+PyYAML==6.0.2
+python-frontmatter==1.1.0
+transformers==4.50.3
+pytest==8.3.5
+pytest-asyncio==0.25.3
+black==25.1.0
+ruff==0.11.2
+ipython>=8.0.0
+# TTS 语音合成
+dashscope>=1.20.0
+edge-tts>=6.1.0
+# WebSocket 客户端（用于 Agent 向感知服务广播 TTS）
+websockets>=12.0
+# 火山引擎 TTS WebSocket 客户端（二进制协议）
+websocket-client>=1.8.0

@@ -1,0 +1,72 @@
+# Python 垃圾
+perception/venv/
+Agent/venv/
+Agent/venv2.0/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Node.js 垃圾 (前端依赖)
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/build/
+
+# 婉晴的日记和本地数据
+perception/storage/logs/*.jsonl
+perception/storage/logs/*.txt
+*.wav
+*.mp3
+
+# 隐私配置
+.env
+Agent/.env
+backend/.env
+frontend/.env
+perception/.env
+
+# Agent 相关
+Agent/chroma_db/
+Agent/logs/
+logs/
+
+# 后端编译产物 (Java)
+backend/target/
+backend/.mvn/
+backend/mvnw
+backend/mvnw.cmd
+
+# 构建日志
+perception/build_log.txt
+perception/startup.err
+perception/startup.log
+Agent/startup.err
+Agent/startup.log
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# 系统文件
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 测试和调试文件
+*.log
+Agent/err.txt
+Agent/decide_err.txt
+check_tts_pipeline.py
+test_*.py
+Agent/debug_quotes.py
+Agent/startup.log
+
+# 数据库文件
+*.db
+*.sqlite
+
+# 缓存
+*.cache
